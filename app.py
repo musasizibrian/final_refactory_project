@@ -26,7 +26,6 @@ try:
     if model_choice == "AdaBoost":
         model = joblib.load("models/best_adaboost_model.pkl")
     else:
-        # Load .h5 FNN model
         model = load_model("models/best_fnn_model.h5")
 except Exception as e:
     st.error(f"❌ Error loading model: {e}")
@@ -49,17 +48,26 @@ with st.form("prediction_form"):
 # 5️⃣ Preprocess Input & Make Prediction
 # ------------------------------
 if submitted:
-    # Encode categorical inputs
-    sex_encoded = 1 if sex == "female" else 0
-    embarked_map = {"S": 0, "C": 1, "Q": 2}
-    embarked_encoded = embarked_map[embarked]
-
-    # Feature vector
-    features = np.array([[pclass, sex_encoded, age, sibsp, parch, fare, embarked_encoded]])
-
     try:
+        # Encode categorical inputs
+        sex_encoded = 1 if sex == "female" else 0
+        embarked_map = {"S": 0, "C": 1, "Q": 2}
+        embarked_encoded = embarked_map[embarked]
+
+        # Engineered features
+        family_size = sibsp + parch
+        is_alone = 1 if family_size == 0 else 0
+        deck = 8          # default / most common deck in training
+        age_group = 0     # default age group
+        title = 2         # default title
+
+        # Combine all 12 features
+        features = np.array([[pclass, sex_encoded, age, sibsp, parch, fare, embarked_encoded,
+                              family_size, deck, is_alone, age_group, title]])
+
+        # Make prediction
         if model_choice == "AdaBoost":
-            prob = model.predict_proba(features)[:, 1][0]
+            prob = model.predict_proba(features[:, :7])[:, 1][0]  # AdaBoost only uses first 7 features
         else:
             prob = model.predict(features)[0][0]
 
