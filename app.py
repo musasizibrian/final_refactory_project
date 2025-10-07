@@ -21,9 +21,9 @@ model_choice = st.selectbox(
 
 # Load models from 'models/' folder
 if model_choice == "AdaBoost":
-    model = joblib.load("models/best_adaboost.pkl")
+    model = joblib.load("models\best_adaboost_model.pkl")
 else:
-    model = load_model("models/best_fnn_model.keras")
+    model = load_model("models\best_fnn_model.keras")
 
 # ------------------------------
 # 3️⃣ Input Form
