@@ -21,9 +21,9 @@ model_choice = st.selectbox(
 
 # Load models from 'models/' folder
 if model_choice == "AdaBoost":
-    model = joblib.load("models\best_adaboost_model.pkl")
+    model = joblib.load(r"models\best_adaboost_model.pkl")
 else:
-    model = load_model("models\best_fnn_model.keras")
+    model = load_model(r"models\best_fnn_model.keras")
 
 # ------------------------------
 # 3️⃣ Input Form
@@ -70,3 +70,5 @@ if submitted:
         st.success("Passenger likely to **Survive** 🚑")
     else:
         st.error("Passenger likely to **Not Survive** ⚠️")
+
+
