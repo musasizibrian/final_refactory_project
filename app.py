@@ -19,10 +19,11 @@ model_choice = st.selectbox(
     ["AdaBoost", "Feedforward Neural Network (FNN)"]
 )
 
+# Load models from 'models/' folder
 if model_choice == "AdaBoost":
-    model = joblib.load("best_adaboost.pkl")
+    model = joblib.load("models/best_adaboost.pkl")
 else:
-    model = load_model("best_fnn_model.keras")
+    model = load_model("models/best_fnn_model.keras")
 
 # ------------------------------
 # 3️⃣ Input Form
@@ -39,28 +40,27 @@ with st.form("prediction_form"):
     submitted = st.form_submit_button("Predict Survival")
 
 # ------------------------------
-# 4️⃣ Preprocess Input
+# 4️⃣ Preprocess Input + Prediction
 # ------------------------------
 if submitted:
+    # Encode categorical inputs
     sex_encoded = 1 if sex == "female" else 0
     embarked_map = {"S": 0, "C": 1, "Q": 2}
     embarked_encoded = embarked_map[embarked]
 
-    # Feature vector (must match training features order)
+    # Feature vector
     features = np.array([[pclass, sex_encoded, age, sibsp, parch, fare, embarked_encoded]])
 
-    # ------------------------------
-    # 5️⃣ Make Prediction
-    # ------------------------------
-    if model_choice == "Feedforward Neural Network (FNN)":
-        prob = model.predict(features)[0][0]
+    # Make prediction
+    if model_choice == "AdaBoost":
+        prob = model.predict_proba(features)[:, 1][0]
     else:
-        prob = model.predict_proba(features)[0][1]
+        prob = model.predict(features)[0][0]
 
     prediction = "✅ Survived" if prob >= 0.5 else "❌ Did Not Survive"
 
     # ------------------------------
-    # 6️⃣ Display Results
+    # 5️⃣ Display Results
     # ------------------------------
     st.subheader("🔎 Prediction Result")
     st.write(f"**{prediction}** (Probability: {prob:.2f})")
