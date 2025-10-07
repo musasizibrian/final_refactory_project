@@ -67,7 +67,7 @@ if submitted:
 
         # Make prediction
         if model_choice == "AdaBoost":
-            prob = model.predict_proba(features[:, :7])[:, 1][0]  # AdaBoost only uses first 7 features
+            prob = model.predict_proba(features)[:, 1][0]   # AdaBoost only uses first 7 features
         else:
             prob = model.predict(features)[0][0]
 
