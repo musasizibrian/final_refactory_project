@@ -19,14 +19,20 @@ model_choice = st.selectbox(
     ["AdaBoost", "Feedforward Neural Network (FNN)"]
 )
 
-# Load models from 'models/' folder
-if model_choice == "AdaBoost":
-    model = joblib.load(r"models\best_adaboost_model.pkl")
-else:
-    model = load_model(r"models\best_fnn_model.keras")
+# ------------------------------
+# 3️⃣ Load Models
+# ------------------------------
+try:
+    if model_choice == "AdaBoost":
+        model = joblib.load("models/best_adaboost_model.pkl")
+    else:
+        # Load .h5 FNN model
+        model = load_model("models/best_fnn_model.h5")
+except Exception as e:
+    st.error(f"❌ Error loading model: {e}")
 
 # ------------------------------
-# 3️⃣ Input Form
+# 4️⃣ Input Form
 # ------------------------------
 with st.form("prediction_form"):
     pclass = st.selectbox("Passenger Class", [1, 2, 3], help="1 = First, 2 = Second, 3 = Third")
@@ -40,7 +46,7 @@ with st.form("prediction_form"):
     submitted = st.form_submit_button("Predict Survival")
 
 # ------------------------------
-# 4️⃣ Preprocess Input + Prediction
+# 5️⃣ Preprocess Input & Make Prediction
 # ------------------------------
 if submitted:
     # Encode categorical inputs
@@ -51,24 +57,24 @@ if submitted:
     # Feature vector
     features = np.array([[pclass, sex_encoded, age, sibsp, parch, fare, embarked_encoded]])
 
-    # Make prediction
-    if model_choice == "AdaBoost":
-        prob = model.predict_proba(features)[:, 1][0]
-    else:
-        prob = model.predict(features)[0][0]
+    try:
+        if model_choice == "AdaBoost":
+            prob = model.predict_proba(features)[:, 1][0]
+        else:
+            prob = model.predict(features)[0][0]
 
-    prediction = "✅ Survived" if prob >= 0.5 else "❌ Did Not Survive"
+        prediction = "✅ Survived" if prob >= 0.5 else "❌ Did Not Survive"
 
-    # ------------------------------
-    # 5️⃣ Display Results
-    # ------------------------------
-    st.subheader("🔎 Prediction Result")
-    st.write(f"**{prediction}** (Probability: {prob:.2f})")
-    st.progress(float(prob))
+        # ------------------------------
+        # 6️⃣ Display Results
+        # ------------------------------
+        st.subheader("🔎 Prediction Result")
+        st.write(f"**{prediction}** (Probability: {prob:.2f})")
+        st.progress(float(prob))
 
-    if prob >= 0.5:
-        st.success("Passenger likely to **Survive** 🚑")
-    else:
-        st.error("Passenger likely to **Not Survive** ⚠️")
-
-
+        if prob >= 0.5:
+            st.success("Passenger likely to **Survive** 🚑")
+        else:
+            st.error("Passenger likely to **Not Survive** ⚠️")
+    except Exception as e:
+        st.error(f"❌ Error during prediction: {e}")
